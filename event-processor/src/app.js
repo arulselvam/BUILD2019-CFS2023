@@ -4,6 +4,7 @@ const config = require('./config');
 
 
 async function main() {
+    await datastore.init();
     const ephName = EventProcessorHost.createHostName('ep');
     const eph = EventProcessorHost.createFromConnectionString(
         ephName,
@@ -23,13 +24,14 @@ async function main() {
     const onMessage = async (partitionContext, eventData) => {
         let event = eventData.body;
         if (event.speed > 80) {
-            let speedingEvent = {
+            let speedingAlert = {
                 speed: event.speed,
                 serialNumber: event.serialNumber,
-                timestamp: event.timestamp
+                timestamp: event.timestamp,
+                type: 'Alert'
             };
-            await datastore.save(speedingEvent);
-            console.log('Created speeding event');
+            await datastore.save(speedingAlert);
+            console.log('Created speeding alert');
         }
         if (count % 100 === 0) {
             return await partitionContext.checkpointFromEventData(eventData);
